@@ -1,0 +1,31 @@
+Module Module1 
+
+   Function User(var1 as Integer,var2 as String, var3 as Integer)  as Integer
+	Dim num1 as Integer
+	Dim num2 as String
+	Dim cadena as Integer
+
+	num1  =  var1
+	num2  = "hola"
+	cadena = var3
+
+
+
+	
+
+                return num1 
+
+
+    End Function
+	
+
+     Sub Main() 
+
+        Dim variable As Integer = User(33, "Hola", 22) 
+        Dim num1 as Integer
+
+
+      
+    End Sub
+
+End Module

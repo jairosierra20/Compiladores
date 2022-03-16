@@ -1,0 +1,22 @@
+Module Module1 
+
+	
+
+     Sub Main() 
+	
+	Dim num1 as Integer
+	Dim num2 as Integer
+       	
+	num1 = 1
+	num2 = 0
+	
+	while num1 > 10 
+	
+	num1 = 1*1
+	
+	end While
+
+      
+    End Sub
+
+End Module

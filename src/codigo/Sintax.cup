@@ -1,0 +1,330 @@
+
+package codigo;
+
+import java_cup.runtime.Symbol;
+import  codigo.Ventana;
+
+parser code
+{:
+     public void syntax_error(Symbol s){
+        Ventana.notificar_er("Error de sintaxis, no se esperaba este token: ["+ s.value +"] Linea " +(s.right)+" columna " +(s.left) );
+    }
+
+   public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+      Ventana.notificar_er("Una Sentencia, Ciclo o Funcion no ha sido cerrada correctamente ");
+    }
+
+:};
+
+
+
+terminal Identificador,  Numero, Cadena, Comilla, parentesisE, parentesisC, Integer,Double,OperadorRelacional,Boolean,Punto,llaveE,
+    llaveC, corcheteE, corcheteC,End,OPRestSuma,OPMultDiv,Enter,ContinuacionLinea,Comentario, Igual, ERROR, Else, Main, Op_Booleano,
+    Sub, SentenciaModulo, Declaracion,For, IF,While,Do,OR,And,concatenacion,then,Function,Return,Dim,AS,struct, Console, TO,
+    WriteLine, coma, String, Next, ReadLine, Loop, New,RMain,
+    espacio
+/* Declarados*/
+   
+;
+
+
+/* no terminales */
+
+non terminal INICIO, SENTENCIA, DECLARACION, DECLARACION_FOR, PARA_SUB,  RETORNO, FUNCION, 
+    WHILE, DO_WHILE,  SENTENCIA_FOR, VARIABLES, ASIGNACION, VALORES_NUMERICOS, FINAL, CUERPO, LINEAS, GLOBALES, PARAMETROS, TIPODATO,ESTRUCTURA,
+
+/* Para IF SENTENCIA_EMPAREJADA, SENTENCIA_DESMPAREJADA, */
+SENTENCIA_IF, LOGICOAND , DECLARACION_IF , ELSE_IF, DECLARACIONES,PARAMETROS2, DATO, IGUALDAD, LLAMADA_FUNCION,  DESPUES,
+
+/* Para Boolean */
+     SENTENCIA_BOOLEANA , LOGICOAND_Prima ,  LOGICOOR, COMPARACION, RECURSION,OP_RECURSIVIDAD, OP_Recursion,
+
+/* Para Aritmeticas */
+     ADICIONES , MULTIPLICACIONES,  MULTIPLICACIONES_PRIMA,  ARITMETICOS, CUERPO_ESTRUCTURA, CONCATENABLES, PROGRAMA,PARA_STRUCK,
+
+/* Para Imprimir */
+IMPRIMIR, CONCATENACION, LEER
+;
+
+
+
+
+start with PROGRAMA;
+
+
+
+INICIO::= SentenciaModulo Identificador CUERPO_ESTRUCTURA
+    Main parentesisE parentesisC CUERPO End Sub CUERPO_ESTRUCTURA FINAL |error 
+;
+
+
+
+
+
+
+VARIABLES::= Identificador coma VARIABLES
+             | Identificador 
+               
+
+;
+
+
+TIPODATO::= AS Integer 
+            | AS Boolean 
+            | AS Double 
+            | AS String
+            | AS Identificador 
+             ;
+
+
+DECLARACION::=   Dim VARIABLES TIPODATO IGUALDAD ;
+
+IGUALDAD::= Igual New Identificador parentesisE PARAMETROS2 parentesisC 
+            | Igual Identificador parentesisE PARAMETROS2 parentesisC 
+            | Igual DATO 
+            | Igual New parentesisE parentesisC 
+            
+            |
+;
+
+
+
+
+/* Para Funciones y Estructuras */
+
+PARAMETROS::= Identificador TIPODATO coma PARAMETROS 
+              | Identificador TIPODATO
+;
+
+
+
+DATO::= ARITMETICOS | Op_Booleano | Cadena | LEER  ;
+
+PARAMETROS2::=  DATO coma PARAMETROS2 | DATO ;
+
+ESTRUCTURA::= struct Identificador PARA_STRUCK End struct
+               
+  ;
+
+CUERPO_ESTRUCTURA::= DECLARACION Enter CUERPO_ESTRUCTURA 
+                     | ESTRUCTURA Enter CUERPO_ESTRUCTURA
+                     | FUNCION Enter CUERPO_ESTRUCTURA
+                     | PARA_SUB Enter CUERPO_ESTRUCTURA
+                     | Enter CUERPO_ESTRUCTURA
+                     | error CUERPO_ESTRUCTURA
+                     | 
+                     
+                     ;
+
+PARA_STRUCK::= DECLARACION Enter PARA_STRUCK | Enter PARA_STRUCK;
+                    
+                     
+                     ;
+
+
+
+
+
+
+
+PARA_SUB::= Sub Identificador parentesisE PARAMETROS parentesisC CUERPO End Sub 
+            | Sub Identificador parentesisE  parentesisC CUERPO End Sub
+            | Sub New parentesisE  parentesisC CUERPO End Sub
+            | Sub New parentesisE PARAMETROS parentesisC CUERPO End Sub
+
+             ;
+
+
+
+RETORNO::= Return Numero 
+           | Return Identificador 
+           | Return Op_Booleano 
+           | Return Cadena 
+           | Return Identificador parentesisE PARAMETROS parentesisC 
+           | Return RECURSION
+        
+           ;
+
+
+FUNCION::= Function Identificador parentesisE PARAMETROS parentesisC TIPODATO CUERPO End Function  
+            | Function Identificador parentesisE PARAMETROS parentesisC CUERPO End Function
+            | Function Identificador parentesisE  parentesisC TIPODATO CUERPO End Function  
+            | Function Identificador parentesisE parentesisC CUERPO End Function
+
+           ;
+
+
+/* Para Funciones y Estructuras */
+
+
+
+SENTENCIA_BOOLEANA::=
+       Identificador  COMPARACION Identificador
+       |  Identificador  COMPARACION Numero 
+       | Identificador  COMPARACION Op_Booleano 
+       | Identificador  COMPARACION Cadena
+       | Identificador  COMPARACION Comilla Comilla
+
+;
+
+
+
+COMPARACION::= OperadorRelacional | Igual;
+
+
+
+
+
+
+
+
+
+
+
+/* Precedencia para los Operadores Logicos   */
+
+DECLARACION_IF::= LOGICOAND LOGICOOR | parentesisE DECLARACION_IF parentesisC
+                 
+;
+
+LOGICOOR::=  OR LOGICOAND LOGICOOR 
+             | 
+;
+
+LOGICOAND::=    SENTENCIA_BOOLEANA LOGICOAND_Prima
+;
+
+LOGICOAND_Prima::= And SENTENCIA_BOOLEANA LOGICOAND_Prima 
+                   | 
+;
+
+/* Termina Precedencia de Operadores Logicos  */
+
+
+/* Sentencia IF */
+
+SENTENCIA_IF::=  IF DECLARACION_IF then CUERPO End IF 
+                 
+;
+
+
+ELSE_IF::= IF DECLARACION_IF then CUERPO Else CUERPO End IF 
+            
+
+;
+
+
+
+
+
+
+/* Aritmeticos */
+
+ARITMETICOS::= MULTIPLICACIONES ADICIONES;
+
+
+ADICIONES::=   OPRestSuma MULTIPLICACIONES ADICIONES 
+               | 
+; 
+
+MULTIPLICACIONES::= VALORES_NUMERICOS MULTIPLICACIONES_PRIMA ;  
+
+
+MULTIPLICACIONES_PRIMA::= OPMultDiv VALORES_NUMERICOS MULTIPLICACIONES_PRIMA
+               | 
+;
+
+
+
+VALORES_NUMERICOS::=  Numero 
+                      | Identificador 
+                      |  parentesisE ARITMETICOS parentesisC
+                      
+;
+/* Fin Aritmeticos */
+
+
+/* Fin Asignacion */
+
+OP_RECURSIVIDAD::= RECURSION 
+
+               | RECURSION OPRestSuma ARITMETICOS
+               | RECURSION OPMultDiv ARITMETICOS 
+               | ARITMETICOS OPRestSuma RECURSION
+               | ARITMETICOS OPMultDiv RECURSION;
+
+
+ASIGNACION::=  Identificador Igual DATO
+               | Identificador Punto Identificador Igual DATO 
+               | Identificador Igual RECURSION
+;
+
+
+/* Fin Asignacion LINEAS::=  Enter LINEAS  | ;*/
+
+IMPRIMIR::= Console Punto WriteLine parentesisE CONCATENACION parentesisC 
+
+;
+
+LEER::=  Console Punto ReadLine parentesisE parentesisC; 
+
+
+LLAMADA_FUNCION::= Identificador Punto Identificador parentesisE  parentesisC 
+                   | Identificador Punto Identificador parentesisE PARAMETROS2 parentesisC ;
+
+CONCATENACION::=  Cadena CONCATENABLES CONCATENACION 
+                  | ARITMETICOS CONCATENABLES CONCATENACION 
+                  | Identificador Punto Identificador CONCATENABLES CONCATENACION 
+                  |Cadena 
+                  | ARITMETICOS
+                  | Identificador Punto Identificador
+
+;
+
+
+CONCATENABLES::= concatenacion | coma | concatenacion ContinuacionLinea Enter ;
+
+
+
+CUERPO::=  DECLARACION Enter CUERPO 
+           | IMPRIMIR Enter CUERPO 
+           | ASIGNACION Enter CUERPO
+           | SENTENCIA_IF Enter CUERPO
+           | ELSE_IF Enter CUERPO
+           | DECLARACION_FOR Enter CUERPO
+           | WHILE Enter CUERPO
+           | DO_WHILE Enter CUERPO
+           | RETORNO Enter CUERPO
+           | LEER Enter CUERPO
+           | LLAMADA_FUNCION Enter CUERPO
+           | Comentario Enter CUERPO
+           | RECURSION Enter
+           | Enter CUERPO
+           | error CUERPO
+           |
+;
+
+GLOBALES::= DECLARACION GLOBALES | ;
+
+
+RECURSION::= Identificador parentesisE PARAMETROS2 parentesisC | Identificador parentesisE parentesisC;
+
+
+DECLARACION_FOR::= For ASIGNACION TO Numero CUERPO Next  ;
+
+
+WHILE::= While DECLARACION_IF CUERPO End While   ;
+
+DO_WHILE::= Do While DECLARACION_IF CUERPO Loop ;
+
+
+
+
+
+FINAL::=  End SentenciaModulo
+;
+
+
+DESPUES::= Enter DESPUES | Enter;
+
+PROGRAMA::= Enter PROGRAMA | INICIO | INICIO DESPUES ;

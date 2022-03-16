@@ -1,0 +1,1711 @@
+package codigo;
+
+import java_cup.runtime.Symbol;
+
+parser code
+{:
+	public String resultado="";
+        public String temporalNum = "";
+        public String temporalNum2 = "";
+        public Listas temporalLis = new Listas();
+        public Listas temporalLis2 = new Listas();
+        public Listas temporalLis3 = new Listas();
+	public Nodo padre;
+        String tempoVar = "";
+          public Tempnuevo temp;
+          public Etiquetas etq;
+          public int flagT= 0;
+          public String flagN= "";
+          public Cuadruplo generaracion = new Cuadruplo();
+        public Nodo Asignaciones = new Nodo("Asignaciones");
+	public int contador = 1;
+        public int tam = 0;
+        public int conts = 0;
+        public int contetq = 0;
+             public Tabla tabla = new Tabla();
+        
+
+
+ public void syntax_error(Symbol s){
+        Ventana.notificar_er("Error de sintaxis: "+ s.value +" Linea " +(s.right)+" columna " +(s.left) );
+    }
+
+ public void semantic_error(String valor) throws java.lang.Exception {
+        Ventana.notificar_er("Error de tipo, el error de tipo , es el error de tipo: "+ valor );
+    }
+
+   public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+      Ventana.notificar_er("Una Sentencia, Ciclo o Funcion no ha sido cerrada correctamente ");
+    }
+
+/*
+  
+    public void syntax_error(Symbol s){
+        System.out.println("Error Sintactico en la Linea " + (s.right+1) +" Columna "+s.left+ ". Identificador " +s.value + " no reconocido." );
+    }
+
+ 
+    public void unrecovered_syntax_error(Symbol s){
+        //System.out.println("Error Sintactico en la Linea " + (s.right+1)+ "Columna "+s.left+". Identificador " + s.value + " no reconocido.");
+		System.out.println(s);
+	}
+*/
+:}
+
+action code
+{:
+
+:}
+
+
+
+terminal Identificador,  Numero, Cadena, Comilla, parentesisE, parentesisC, Integer,Double,OperadorRelacional,Boolean,Punto,llaveE,
+    llaveC, corcheteE, corcheteC,End,OPRestSuma,OPMultDiv, Enter,ContinuacionLinea,Comentario, Igual, ERROR, Else, Main, Op_Booleano,
+    Sub, SentenciaModulo, Declaracion,For, IF,While,Do,OR,And,concatenacion,then,Function,Return,Dim,AS,struct, Console, TO,
+    WriteLine, coma, String, Next, ReadLine, Loop, New,RMain,
+    espacio
+/* Declarados*/
+   
+;
+
+
+/* no terminales */
+
+non terminal INICIO, SENTENCIA, DECLARACION, DECLARACION_FOR, PARA_SUB,  RETORNO, FUNCION, 
+    WHILE, DO_WHILE,  SENTENCIA_FOR, VARIABLES, ASIGNACION, M, VALORES_NUMERICOS,PARA_STRUCK, FINAL, CUERPO, LINEAS, GLOBALES, PARAMETROS, TIPODATO,ESTRUCTURA,
+/* Para IF SENTENCIA_EMPAREJADA, SENTENCIA_DESMPAREJADA, */
+SENTENCIA_IF, LOGICOAND , DECLARACION_IF , ELSE_IF, DECLARACIONES,PARAMETROS2, DATO, IGUALDAD, LLAMADA_FUNCION, PROGRAMA, DESPUES,
+
+/* Para Boolean */
+     SENTENCIA_BOOLEANA , LOGICOAND_Prima ,  LOGICOOR, COMPARACION, RECURSION,OP_RECURSIVIDAD, OP_Recursion,
+
+/* Para Aritmeticas */
+     ADICIONES , MULTIPLICACIONES, N,  MULTIPLICACIONES_PRIMA,  ARITMETICOS, CUERPO_ESTRUCTURA, CONCATENABLES, CUERPO_ESTRUCTURA2,
+
+/* Para Imprimir */
+IMPRIMIR, CONCATENACION, LEER ,S 
+;
+
+
+/* Precedencia */
+precedence left Igual;
+precedence left OR;
+precedence left And;
+precedence left OperadorRelacional;
+precedence left OPRestSuma , concatenacion;
+precedence left OPMultDiv;
+precedence nonassoc Else;
+
+
+
+start with PROGRAMA;
+
+
+
+
+INICIO::=SentenciaModulo:n Identificador:n1 CUERPO_ESTRUCTURA:nC Main:n2 {:  generaracion.Funciones("etq", "MAIN"); :} parentesisE parentesisC CUERPO:Cuerpo End:n6 {:  generaracion.Funciones("end", "MAIN"); :} Sub:n7 CUERPO_ESTRUCTURA FINAL:n8 {:
+        
+        Nodo nd = new Nodo("INICIO");
+        
+        nd.setNumNodo(parser.contador++);
+        parser.contador++;
+        nd.addHijo(new Nodo(n.toString()));
+        nd.addHijo(new Nodo(n1.toString()));
+        
+        if (nC != null)
+        nd.addHijo((Nodo)nC);
+
+        nd.addHijo(new Nodo(n2.toString()));
+        // E nd.addHijo(new Nodo(n3.toString() + " " + n4.toString()));
+
+        if (Cuerpo != null)
+        nd.addHijo((Nodo)Cuerpo);
+        //nd.addHijo(new Nodo(n4.toString()));
+       // nd.addHijo(new Nodo(n6.toString()));
+        //nd.addHijo((Nodo)n5);
+        nd.addHijo(new Nodo(n6.toString() + " " + n7.toString()));
+        //nd.addHijo((Nodo)nC2); 
+        nd.addHijo((Nodo)n8);
+     
+/*
+        */
+
+        parser.padre = (Nodo)nd;
+
+        RESULT = nd;
+
+:};
+
+   VARIABLES::= Identificador:n1 coma VARIABLES:n3  {:
+            Nodo nd = new Nodo("VARIABLES");
+            nd.setNumNodo(parser.contador++);
+           
+             nd.addHijo(new Nodo(n1.toString()));
+             // E nd.addHijo(new Nodo(n2.toString()));
+             nd.addHijo((Nodo)n3);
+             nd.setValor(n1.toString());
+             RESULT = nd;
+
+
+             :} 
+             | 
+             Identificador:n1{:
+             Nodo nd = new Nodo(n1.toString());
+            nd.setNumNodo(parser.contador++);
+             nd.setValor(n1.toString());
+            
+             RESULT = nd;
+ 
+
+
+:};
+
+
+
+    TIPODATO::= AS:n1 Integer:n2{:
+            Nodo nd = new Nodo(n2.toString());
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            // nd.addHijo(new Nodo(n1.toString()));
+             //nd.addHijo(new Nodo(n2.toString()));
+             RESULT = nd; :}                      
+            | 
+            AS:n1  Boolean:n2{:
+            Nodo nd = new Nodo(n2.toString());
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             // E nd.addHijo(new Nodo(n1.toString()));
+             //nd.addHijo(new Nodo(n2.toString()));
+             RESULT = nd; :} 
+ 
+       
+            | 
+            AS:n1  String:n2{:
+            Nodo nd = new Nodo(n2.toString());
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             //E nd.addHijo(new Nodo(n1.toString()));
+             //nd.addHijo(new Nodo(n2.toString()));
+             RESULT = nd; :} 
+            | 
+            AS:n1  Identificador:n2{:
+            Nodo nd = new Nodo(n2.toString());
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             // E nd.addHijo(new Nodo(n1.toString()));
+             //nd.addHijo(new Nodo(n2.toString()));
+             RESULT = nd; 
+:} ;
+
+
+DECLARACION::=  Dim:n1 VARIABLES:n2 TIPODATO:n3 IGUALDAD:n4{:
+        Nodo nd = new Nodo("DECLARACION_VAR");
+       // E nd.addHijo(new Nodo(n1.toString()));
+        nd.setNumNodo(parser.contador++);
+    
+        nd.addHijo((Nodo)n2);
+        nd.addHijo((Nodo)n3);
+
+
+        if (n4 != null){
+        nd.addHijo((Nodo)n4);
+        generaracion.Igualdad("=", "ret" , ((Nodo)n2).getValor() );
+
+}
+       
+        RESULT = nd;
+:};
+
+
+IGUALDAD::= Igual:n1 New:n2 Identificador:n3 parentesisE:n4 PARAMETROS2:n5 parentesisC:n6{:
+            Nodo nd = new Nodo("IGUALDAD");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString() + " " + n2.toString() + " " + n3.toString() ));
+            // nd.addHijo(new Nodo(n2.toString()));
+            // nd.addHijo(new Nodo(n3.toString()));
+            // E nd.addHijo(new Nodo(n4.toString()));
+             nd.addHijo((Nodo)n5);
+            // E nd.addHijo(new Nodo(n6.toString()));
+             
+             RESULT = nd;
+             :}
+            | Igual:n1 Identificador:n3 parentesisE:n4 PARAMETROS2:n5 parentesisC:n6{:
+            Nodo nd = new Nodo("IGUALDAD");
+            nd.setNumNodo(parser.contador++);
+
+            for(int i = 0; i < temporalLis3.getLista2().size(); i++){
+                generaracion.OtraCosa("Param",  temporalLis3.getLista2().get(i) );
+            }
+
+                generaracion.OtraCosa("Call", n3.toString() +  "," + temporalLis3.getLista2().size() );
+                 temporalLis3 = new Listas();
+             nd.addHijo(new Nodo(n1.toString()  + " " + n3.toString() ));
+         
+             nd.addHijo((Nodo)n5);
+            // E nd.addHijo(new Nodo(n6.toString()));
+             
+             RESULT = nd;
+             :}
+            | 
+
+
+
+            Igual:n1 DATO:n2 {:
+            Nodo nd = new Nodo("IGUALDAD");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+             
+             RESULT = nd;
+             :}
+            | 
+            Igual:n1 Identificador:n2 parentesisE:n3 parentesisC:n4 {:
+            Nodo nd = new Nodo(n1.toString() +" " + n2.toString());
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+           
+             
+             RESULT = nd;
+             :}
+            |
+;
+
+PARAMETROS::= Identificador:n1 TIPODATO:n2 coma:n3 PARAMETROS:n4{:
+            Nodo nd = new Nodo("PARAMETROS");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+             //nd.addHijo(new Nodo(n3.toString()));
+             nd.addHijo((Nodo)n4);
+             
+             RESULT = nd;
+             :}
+              | 
+                Identificador:n1 TIPODATO:n2{:
+            Nodo nd = new Nodo("PARAMETROS");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+             
+             RESULT = nd;
+             :}
+;
+
+DATO::= ARITMETICOS:n1{:
+           Nodo nd = new Nodo ("Aritmeticos");
+
+           
+                    nd.setValor(((Nodo)n1).getValor());
+
+                    
+            
+          
+            nd.setNumNodo(parser.contador++);
+              
+             RESULT = nd;
+             :}
+            | 
+            Op_Booleano:n1{:
+            Nodo nd = new Nodo(n1.toString());
+            nd.setNumNodo(parser.contador++);
+            nd.setValor(n1.toString());
+          
+             //nd.addHijo(new Nodo(n1.toString()));
+           
+             RESULT = nd;
+             :} 
+            |
+            Cadena:n1{:
+            Nodo nd = new Nodo ("Cadena");
+            Nodo nodo1 = new Nodo ("Valor Cadena");
+
+            nodo1.setNumNodo(parser.contador++);
+            nodo1.setValor(n1.toString());
+          
+            nd.addHijo(nodo1);
+            nd.setValor(n1.toString());
+            nd.setNumNodo(parser.contador++);
+
+             RESULT = nd;
+             :} 
+            | 
+            LEER:n1{:
+            Nodo nd = (Nodo)n1;
+            nd.setNumNodo(parser.contador++);
+            
+             //nd.addHijo((Nodo)n1);
+             nd.setValor(((Nodo)n1).getValor());
+             RESULT = nd;
+             :}  ;
+
+PARAMETROS2::=  DATO:n1 coma:n2 PARAMETROS2:n3{:
+            Nodo nd = new Nodo("PARAMETROS");
+            nd.setNumNodo(parser.contador++);
+            
+            nd.addHijo((Nodo)n1);
+
+            
+             temporalLis3.getLista2().add(((Nodo)n1).getValor());
+            nd.setValor(((Nodo)n1).getValor());
+             
+            nd.addHijo((Nodo)n3);
+             
+             RESULT = nd;
+             :} 
+            | 
+            DATO:n1{:
+            Nodo nd = new Nodo("PARAMETROS");
+            nd.setNumNodo(parser.contador++);
+           
+            nd.addHijo((Nodo)n1);
+
+            temporalLis3.getLista2().add(((Nodo)n1).getValor());
+            nd.setValor(((Nodo)n1).getValor());
+             
+             RESULT = nd;
+             :} | RECURSION:n1 coma:n2 PARAMETROS2:n3  {:
+           
+           Nodo nd = new Nodo("PARAMETROS");
+            nd.setNumNodo(parser.contador++);
+            
+            nd.addHijo((Nodo)n1);
+
+            
+             temporalLis3.getLista2().add(((Nodo)n1).getValor());
+            nd.setValor(((Nodo)n1).getValor());
+             
+            nd.addHijo((Nodo)n3);
+             
+             RESULT = nd;
+
+
+             :}|  RECURSION:n1 {:
+            Nodo nd = new Nodo("PARAMETROS");
+            nd.setNumNodo(parser.contador++);
+           
+            nd.addHijo((Nodo)n1);
+
+            temporalLis3.getLista2().add(((Nodo)n1).getValor());
+            nd.setValor(((Nodo)n1).getValor());
+             :} ;
+
+ESTRUCTURA::= struct:n1 Identificador:n2 PARA_STRUCK:n6 End:n4 struct:n5{:
+            Nodo nd = new Nodo("ESTRUCTURA");
+            nd.setNumNodo(parser.contador++);
+         
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             
+             if (n6 != null)
+             nd.addHijo((Nodo)n6);
+
+             nd.addHijo(new Nodo(n4.toString()+" "+n5.toString()));
+             
+             RESULT = nd;
+             :};
+
+/* Para Funciones y Estructuras */
+
+
+
+
+
+
+
+  CUERPO_ESTRUCTURA::=  DECLARACION:n1 Enter  CUERPO_ESTRUCTURA:n2 {:
+        Nodo nd = new Nodo("CUERPO_FUNCIONES");
+        nd.setNumNodo(parser.contador++);
+       
+        nd.addHijo((Nodo)n1);
+
+        if (n2 != null)
+        nd.addHijo((Nodo)n2);
+        RESULT = nd;  :} 
+        |       
+        ESTRUCTURA:n1 Enter  CUERPO_ESTRUCTURA:n2 {:
+            Nodo nd = new Nodo("CUERPO_FUNCIONES");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+
+            if (n2 != null)
+            nd.addHijo((Nodo)n2);
+            RESULT = nd;  :}
+        |       
+        FUNCION:n1 Enter CUERPO_ESTRUCTURA:n2 {:
+            Nodo nd = new Nodo("CUERPO_FUNCIONES");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+
+            if (n2 != null)
+            nd.addHijo((Nodo)n2);
+            RESULT = nd;  :}
+         |       
+        PARA_SUB:n1 Enter CUERPO_ESTRUCTURA:n2 {:
+            Nodo nd = new Nodo("CUERPO_FUNCIONES");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+
+            if (n2 != null)
+            nd.addHijo((Nodo)n2);
+            RESULT = nd;  :} 
+        | Enter:x CUERPO_ESTRUCTURA:n2 {:
+              
+            if (n2 != null)
+            RESULT = n2;
+
+
+        :}
+        | 
+
+;
+
+
+PARA_STRUCK::= DECLARACION:n1 Enter PARA_STRUCK:n2 {:
+   Nodo nd = new Nodo("CUERPO_Estructura");
+        nd.setNumNodo(parser.contador++);
+        parser.contador++;
+        nd.addHijo((Nodo)n1);
+
+        if (n2 != null)
+        nd.addHijo((Nodo)n2);
+        RESULT = nd; 
+
+:} | Enter PARA_STRUCK:n2{:
+ if (n2 != null)
+            RESULT = n2;
+
+    :} |  ;
+
+
+
+
+
+ PARA_SUB::= Sub:n1 Identificador:n2  parentesisE:n3  PARAMETROS:n4 parentesisC:n5 {:generaracion.Funciones("etq",n2.toString());:} CUERPO:n6 End:n7 {:generaracion.Funciones("end",n2.toString());:} Sub:n8{:
+            Nodo nd = new Nodo("CUERPO_SUB");
+            nd.setNumNodo(parser.contador++);
+            
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             //nd.addHijo(new Nodo(n3.toString()));
+             nd.addHijo((Nodo)n4);
+             //nd.addHijo(new Nodo(n5.toString()));
+
+             if (n6 != null)
+             nd.addHijo((Nodo)n6);
+             nd.addHijo(new Nodo(n7.toString()+" "+n8.toString()));
+             
+             RESULT = nd;
+             :}
+            | 
+            Sub:n1 Identificador:n2  parentesisE:n3  parentesisC:n4 {:generaracion.Funciones("etq",n2.toString());:} CUERPO:n5 End:n6 {:generaracion.Funciones("end",n2.toString());:} Sub:n7{:
+            Nodo nd = new Nodo("CUERPO_SUB");
+            nd.setNumNodo(parser.contador++);
+         
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString() + "" + n3.toString()+""+n4.toString()));
+          
+             
+             if (n5 != null)
+             nd.addHijo((Nodo)n5);
+             nd.addHijo(new Nodo(n6.toString()+" "+n7.toString()));
+             
+             RESULT = nd;
+             :}
+            | 
+            Sub:n1 New:n2 parentesisE:n3  parentesisC:n4 {:generaracion.Funciones("etq",n2.toString());:} CUERPO:n5 End:n6 {:generaracion.Funciones("end",n2.toString());:} Sub:n7 {:
+            Nodo nd = new Nodo("CUERPO_SUB");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo (new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+         
+
+             if (n5 != null)
+             nd.addHijo((Nodo)n5);
+             nd.addHijo(new Nodo(n6.toString()+" "+n7.toString()));
+             
+             RESULT = nd;
+             :}
+            | 
+            Sub:n1 New:n2 parentesisE:n3 PARAMETROS:n4 parentesisC:n5 {:generaracion.Funciones("etq",n2.toString());:} CUERPO:n6 End:n7 {:generaracion.Funciones("end",n2.toString());:} Sub:n8{:
+            Nodo nd = new Nodo("CUERPO_SUB");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             //nd.addHijo(new Nodo(n3.toString()));
+             nd.addHijo((Nodo)n4);
+             //nd.addHijo(new Nodo(n5.toString()));
+             
+             if (n6 != null)
+             nd.addHijo((Nodo)n6);
+             nd.addHijo(new Nodo(n7.toString()+" "+n8.toString()));
+             
+             RESULT = nd;
+             :};
+
+
+RETORNO::= Return:n1 Numero:n2{:
+            Nodo nd = new Nodo("RETORNO");
+            nd.setNumNodo(parser.contador++);
+            //nd.setValor(n2.toString());
+            generaracion.OtraCosa("Return",n2.toString());
+             nd.addHijo(new Nodo(n2.toString()));
+             
+             RESULT = nd;
+             :}
+           | 
+            Return:n1 Identificador:n2 {:
+            Nodo nd = new Nodo("RETORNO");
+            nd.setNumNodo(parser.contador++);
+            nd.setValor(n2.toString());
+            generaracion.OtraCosa("Return",n2.toString());
+             //nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             
+             RESULT = nd;
+             :}
+           | 
+            Return:n1 Op_Booleano:n2 {:
+            Nodo nd = new Nodo("RETORNO");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             //nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             
+             RESULT = nd;
+             :}
+           | 
+            Return:n1 Cadena:n2 {:
+            Nodo nd = new Nodo("RETORNO");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             //nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             
+             RESULT = nd;
+             :}
+           | 
+            Return:n1 Identificador:n2 parentesisE:n3 PARAMETROS:n4 parentesisC:n5 {:
+            Nodo nd = new Nodo("RETORNO");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             //nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             //nd.addHijo(new Nodo(n3.toString()));
+             nd.addHijo((Nodo)n4);
+             //nd.addHijo(new Nodo(n5.toString()));
+             RESULT = nd;
+             :}
+           | 
+            Return:n1 RECURSION:n2 {:
+            Nodo nd = new Nodo("RETORNO");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             //nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+             RESULT = nd;
+             :};
+
+FUNCION::= Function:n1 Identificador:n2  parentesisE:n3 PARAMETROS:n4 parentesisC:n5 TIPODATO:n6 {:generaracion.Funciones("etq",n2.toString());:} CUERPO:n7 RETORNO:n10 DESPUES End:n8 {:generaracion.Funciones("end",n2.toString());:} Function:n9 {:
+            Nodo nd = new Nodo("FUNCION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             //nd.addHijo(new Nodo(n3.toString()));
+             nd.addHijo((Nodo)n4);
+             nd.addHijo(new Nodo(n5.toString()));
+             //nd.addHijo((Nodo)n6);
+
+             if (n7 != null)
+             nd.addHijo((Nodo)n7);
+             nd.addHijo(new Nodo(n8.toString()+" "+n9.toString()));
+             RESULT = nd;
+             :}
+            | 
+            Function:n1 Identificador:n2 parentesisE:n3 PARAMETROS:n4 parentesisC:n5 {:generaracion.Funciones("etq",n2.toString());:} CUERPO:n6 End:n7 {:generaracion.Funciones("end",n2.toString());:} Function:n8{:
+            Nodo nd = new Nodo("FUNCION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString()));
+             //nd.addHijo(new Nodo(n3.toString()));
+             nd.addHijo((Nodo)n4);
+             //nd.addHijo(new Nodo(n5.toString()));
+             
+             if (n6 != null)
+             nd.addHijo((Nodo)n6);
+             nd.addHijo(new Nodo(n7.toString()+" "+n8.toString()));
+             RESULT = nd;
+             :}
+            |
+             Function:n1 Identificador:n2 parentesisE:n3  parentesisC:n4 TIPODATO:n5 {:generaracion.Funciones("etq",n2.toString());:} CUERPO:n6 End:n7 {:generaracion.Funciones("end",n2.toString());:} Function:n8{:
+            Nodo nd = new Nodo("FUNCION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString() + n3.toString()+""+n4.toString()));
+            
+             nd.addHijo((Nodo)n5);
+
+             if (n6 != null)
+             nd.addHijo((Nodo)n6);
+             nd.addHijo(new Nodo(n7.toString()+" "+n8.toString()));
+             RESULT = nd;
+             :}  
+            | 
+            Function:n1 Identificador:n2 parentesisE:n3 parentesisC:n4 {:generaracion.Funciones("etq",n2.toString());:} CUERPO:n5 End:n6 {:generaracion.Funciones("end",n2.toString());:} Function:n7{:
+            Nodo nd = new Nodo("FUNCION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo(new Nodo(n2.toString() + n3.toString()+" "+n4.toString()));
+            
+
+             if (n5 != null)
+             nd.addHijo((Nodo)n5);
+             nd.addHijo(new Nodo(n6.toString()+" "+n7.toString()));
+             RESULT = nd;
+             :};
+
+SENTENCIA_BOOLEANA::=Identificador:n1  COMPARACION:n2 VALORES_NUMERICOS:n3{:
+            Nodo nd = new Nodo("SENTENCIA_BOOLEANA");
+            nd.setNumNodo(parser.contador++);
+            Listas booli = new Listas();
+            
+              booli.getVerdadero().add(generaracion.getIntermedio().size() );
+            booli.getFalso().add(generaracion.getIntermedio().size() + 1 );
+
+          
+            generaracion.Booleanos(((Nodo)n2).getValor(),n1.toString(), ((Nodo)n3).getValor() , "");
+            generaracion.Saltos("GOTO","");
+
+            
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+             nd.addHijo((Nodo)n3);
+             nd.setHijos2(booli);
+
+             RESULT = nd;
+               
+             :}
+       |  
+        Identificador:n1  COMPARACION:n2 Op_Booleano:n3 {:
+            Nodo nd = new Nodo("SENTENCIA_BOOLEANA");
+            nd.setNumNodo(parser.contador++);
+
+
+             Listas booli = new Listas();
+
+             booli.getVerdadero().add(generaracion.getIntermedio().size());
+            booli.getFalso().add(generaracion.getIntermedio().size() + 1 );
+
+            generaracion.Booleanos(((Nodo)n2).getValor(),n1.toString(), ((Nodo)n3).getValor() , "");
+            generaracion.Saltos("GOTO","");
+       
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+             nd.addHijo(new Nodo(n3.toString()));
+             nd.setHijos2(booli);
+
+
+             RESULT = nd;
+             :} 
+       | 
+        Identificador:n1  COMPARACION:n2 Cadena:n3{:
+            Nodo nd = new Nodo("SENTENCIA_BOOLEANA");
+            nd.setNumNodo(parser.contador++);
+                
+
+                 Listas booli = new Listas();
+
+             booli.getVerdadero().add(generaracion.getIntermedio().size() );
+            booli.getFalso().add(generaracion.getIntermedio().size() + 1 );
+
+            generaracion.Booleanos(((Nodo)n2).getValor(),n1.toString(), ((Nodo)n3).getValor() , "");
+            generaracion.Saltos("GOTO","");
+
+
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+             nd.addHijo(new Nodo(n3.toString()));
+             nd.setHijos2(booli);
+
+
+             RESULT = nd;
+             :}
+       | Identificador:n1  COMPARACION:n2 Comilla:n3 Comilla:n4{:
+            Nodo nd = new Nodo("SENTENCIA_BOOLEANA");
+            nd.setNumNodo(parser.contador++);
+         
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+             nd.addHijo(new Nodo(n3.toString()+" "+n4.toString()));
+             RESULT = nd;
+             :}
+
+            | Op_Booleano:n1  {: 
+                    
+
+                  Nodo nd = new Nodo("SENTENCIA_BOOLEANA");
+            nd.setNumNodo(parser.contador++);
+            Listas booli = new Listas();
+
+
+            if(((n1.toString()).toLowerCase()).equals("true")){
+                
+                
+                booli.getVerdadero().add( generaracion.getIntermedio().size() );
+                generaracion.Saltos("GOTO" , "");
+
+                }else if(((n1.toString()).toLowerCase()).equals("false")){
+
+                    booli.getFalso().add( generaracion.getIntermedio().size());
+                    generaracion.Saltos("GOTO" , "");
+
+             }
+
+
+             nd.addHijo(new Nodo(n1.toString()));
+             
+             nd.setHijos2(booli);
+
+             RESULT = nd;
+
+
+                   :} | parentesisE:n1 DECLARACION_IF:n2 parentesisC:n3  {:  
+     
+            RESULT = ((Nodo)n2);
+
+                  :}  ;
+// ESTO SE AGREGA
+
+
+
+COMPARACION::= OperadorRelacional:n1 {:
+            Nodo nd = new Nodo(n1.toString());
+            nd.setNumNodo(parser.contador++);
+            nd.setValor(n1.toString());
+             
+             RESULT = nd;
+             :} 
+            |
+             Igual:n1{:
+            Nodo nd = new Nodo(n1.toString());
+            nd.setNumNodo(parser.contador++);
+            nd.setValor(n1.toString());
+            
+             RESULT = nd;
+             :} ;
+
+DECLARACION_IF::=  LOGICOAND:n1 {: temporalLis = (((Nodo)n1).getHijos2());  :} LOGICOOR:n2 {:
+
+                
+            Nodo nd = new Nodo("DECLARACION_IF");
+            nd.setNumNodo(parser.contador++);
+           
+             
+            nd.setValor(((Nodo)n1).getValor());
+            
+             nd.setHijos2(temporalLis);
+            
+           
+             nd.addHijo((Nodo)n1);
+
+             if (n2 != null){
+
+              nd.setHijos2(temporalLis);
+             nd.addHijo((Nodo)n2);
+             
+
+              }
+
+
+             RESULT = nd;
+
+
+
+             :} ; 
+            
+
+LOGICOOR::= OR:n1 M:n4 LOGICOAND:n2{:
+            Nodo nd = new Nodo(n1.toString());
+            nd.setNumNodo(parser.contador++);
+        
+             //nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+
+                  Listas booli = new Listas();
+            
+              generaracion.Completo(temporalLis.getFalso(), n4.toString());
+             
+              booli.setVerdadero(generaracion.Fusion(temporalLis.getVerdadero(), ((Nodo)n2).getHijos2().getVerdadero()));
+              booli.setFalso(((Nodo)n2).getHijos2().getFalso());
+             
+
+            // if (n3 != null)
+             //nd.addHijo((Nodo)n3);
+             nd.setHijos2(booli);
+              temporalLis = nd.getHijos2();
+             RESULT = nd;
+
+             :}  LOGICOOR:n3 
+             | 
+;
+
+LOGICOAND::=   SENTENCIA_BOOLEANA:n1 {: temporalLis2 = (((Nodo)n1).getHijos2()); :}  LOGICOAND_Prima:n2 {:
+            Nodo nd = new Nodo("LOGICOAND");
+            nd.setNumNodo(parser.contador++);
+          //  parser.contador++;
+             nd.addHijo((Nodo)n1);
+             nd.setHijos2(temporalLis2);
+
+             if (n2 != null){
+
+              nd.setHijos2(temporalLis2);
+             nd.addHijo((Nodo)n2);
+           
+
+              }
+
+            RESULT = nd;
+             :}  ;
+
+LOGICOAND_Prima::= And:n1 M:n4 SENTENCIA_BOOLEANA:n2{:
+            Nodo nd = new Nodo(n1.toString());
+            nd.setNumNodo(parser.contador++);
+            Listas booli = new Listas();
+            
+              generaracion.Completo(temporalLis2.getVerdadero(), n4.toString());
+   
+              booli.setFalso(generaracion.Fusion(temporalLis2.getFalso(), ((Nodo)n2).getHijos2().getFalso()));
+              booli.setVerdadero( ((Nodo)n2).getHijos2().getVerdadero() );
+              
+             nd.addHijo((Nodo)n2);
+
+            // if (n3 != null)
+            // nd.addHijo((Nodo)n3);
+
+             nd.setHijos2(booli);
+            
+             temporalLis2 = nd.getHijos2();
+
+             RESULT = nd;
+             :} LOGICOAND_Prima:n3 
+                   | 
+;
+
+
+SENTENCIA_IF::=  IF:n1 DECLARACION_IF:n2 then:n3 M:n7 CUERPO:n4 End:n5 IF:n6 M:n8{:
+                
+            Nodo nd = new Nodo("SENTENCIA_IF");
+            
+            nd.setNumNodo(parser.contador++);
+           
+             nd.addHijo(new Nodo(n1.toString()));
+             nd.addHijo((Nodo)n2);
+           
+            Listas booli = new Listas();
+
+            
+             generaracion.Completo(((Nodo)n2).getHijos2().getVerdadero(), n7.toString());
+             generaracion.Completo(((Nodo)n2).getHijos2().getFalso(), n8.toString());
+             
+             
+             if (n4 != null){   
+             nd.addHijo((Nodo)n4);
+            
+            booli.setSiguiente(generaracion.Fusion(((Nodo)n2).getHijos2().getFalso() , ((Nodo)n4).getHijos2().getSiguiente() ));
+             
+                nd.setHijos2(booli);
+                
+             
+            }
+
+          
+
+             nd.addHijo(new Nodo(n5.toString()+" "+n6.toString()));
+
+             
+             RESULT = nd;
+             :};
+
+ELSE_IF::= IF:n1 DECLARACION_IF:n2 then:n3 M:m1 CUERPO:n4 Else:n5 N:m3 M:m2 CUERPO:n6 End:n7 IF:n8 M:m4 {:
+            Nodo nd = new Nodo("SENTENCIA_ELSE_IF");
+            nd.setNumNodo(parser.contador++);
+
+
+            
+             nd.addHijo(new Nodo(n1.toString()));
+            nd.addHijo((Nodo)n2);
+
+               Listas booli = new Listas();
+             
+             generaracion.Completo(((Nodo)n2).getHijos2().getVerdadero(), m1.toString());
+             generaracion.Completo(((Nodo)n2).getHijos2().getFalso(), m2.toString());
+
+            
+           
+             
+            if (n4 != null && n6 != null){
+            nd.addHijo((Nodo)n4);
+             booli.setSiguiente(generaracion.Fusion(((Listas)m3).getList(), generaracion.Fusion( ((Nodo)n4).getHijos2().getSiguiente(), ((Nodo)n6).getHijos2().getSiguiente()   )  ));
+              nd.addHijo((Nodo)n6);
+            }
+                
+            generaracion.Completo(((Listas)m3).getList(), m4.toString());
+            nd.addHijo(new Nodo(n5.toString()));
+            
+            nd.addHijo(new Nodo(n7.toString()+" "+n8.toString()));
+
+            nd.setHijos2(booli);
+
+             RESULT = nd;
+             :};
+
+
+M::= {: int n = (generaracion.getIntermedio().size() ) ; RESULT = n;   :};
+
+N::= {: Listas booli = new Listas(); booli.getList().add((generaracion.getIntermedio().size() )) ; generaracion.Saltos("GOTO", "" ); RESULT = booli;   :};
+///// POR AQUI NOS QUEDAMOS!!!
+
+
+ARITMETICOS::= MULTIPLICACIONES:n1 {: temporalNum2 = ((Nodo)n1).getValor() ; if(flagT != 0){ temporalNum2 = flagN; flagT = 0;   } :}  ADICIONES:n2{:
+
+
+            
+            Nodo nd = new Nodo("ARITMETICOS");
+            nd.setNumNodo(parser.contador++);
+           // nd.setValor(((Nodo)n1).getValor());
+             nd.setValor(((Nodo)n1).getValor());
+             nd.addHijo((Nodo)n1);
+
+             
+            
+             
+             if (n2 != null){
+            // conts++;
+            // temp = new Tempnuevo(conts);
+             nd.setValor(temporalNum2);
+            
+            //nd.setValor(((Nodo)n2).getValor());
+
+            
+            
+          //  nd.setValor((generaracion.Operacion(((Nodo)n2).getHijos().get(0).getNombre() , (((Nodo)n1).getValor()) , (((Nodo)n2).getValor()), temp )).getNombre());
+                  
+
+
+                 nd.addHijo((Nodo)n2);
+        
+
+
+}
+             RESULT = nd;
+             :};
+
+ADICIONES::=   OPRestSuma:n1 MULTIPLICACIONES:n2{:
+
+            
+            conts++;
+            temp = new Tempnuevo(conts);
+            Nodo nd = new Nodo("ADICIONES");
+              
+            nd.setNumNodo(parser.contador++);
+            nd.addHijo(new Nodo(n1.toString()));
+            nd.addHijo((Nodo)n2);
+
+                    
+           nd.setValor( (generaracion.Operacion(  n1.toString() , temporalNum2 , ((Nodo)n2).getValor() , temp )).getNombre() ); 
+                
+
+
+               temporalNum2 = nd.getValor(); 
+
+                RESULT = nd;
+
+:}  ADICIONES:n3 
+               | 
+;
+
+
+
+
+MULTIPLICACIONES::= VALORES_NUMERICOS:n1 {: temporalNum = ((Nodo)n1).getValor(); :} MULTIPLICACIONES_PRIMA:n2{:
+            Nodo nd = new Nodo("MULTIPLICACIONES");
+            nd.setNumNodo(parser.contador++);
+               nd.setValor(((Nodo)n1).getValor());
+             nd.addHijo((Nodo)n1);
+
+             
+            nd.setValor(temporalNum);
+            
+
+             if (n2 != null){
+             //conts++;
+             //temp = new Tempnuevo(conts);
+            
+              nd.setValor(temporalNum);
+
+
+            //nd.setValor((generaracion.Operacion(((Nodo)n2).getHijos().get(0).getNombre() , (((Nodo)n1).getValor()) , ((Nodo)n2).getValor(), temp )).getNombre());
+                  
+              nd.addHijo((Nodo)n2);
+
+}
+             RESULT = nd;
+             :};
+
+MULTIPLICACIONES_PRIMA::= OPMultDiv:n1 VALORES_NUMERICOS:n2 {:
+            conts++;
+            temp = new Tempnuevo(conts);
+            Nodo nd = new Nodo("MULTIPLICACIONES_PRIMA");
+              
+            nd.setNumNodo(parser.contador++);
+            nd.addHijo(new Nodo(n1.toString()));
+            nd.addHijo((Nodo)n2);
+
+
+           nd.setValor( (generaracion.Operacion(  n1.toString() , temporalNum , ((Nodo)n2).getValor() , temp )).getNombre() ); 
+               
+
+               temporalNum = nd.getValor(); 
+
+                RESULT = nd;
+
+:} 
+
+            MULTIPLICACIONES_PRIMA:n3 
+               | 
+;
+
+
+VALORES_NUMERICOS::=  Numero:n1 {:
+            Nodo nd = new Nodo(n1.toString());
+            nd.setNumNodo(parser.contador++);
+            nd.setValor(n1.toString());
+
+                     
+          
+             RESULT = nd;
+             :}
+                      | 
+                        Identificador:n1 {:
+
+            Nodo nd = new Nodo(n1.toString());
+            nd.setNumNodo(parser.contador++);
+            
+
+            // for (Nodo hijos : Asignaciones.getHijos()) {
+            //if ((hijos.getNombre().equals(n1.toString()))) {
+              //      nd.setValor(hijos.getValor());
+            //}}
+            
+
+            nd.setValor(n1.toString());
+       
+            
+        
+               
+             
+           
+             RESULT = nd;
+             :}
+                      |  
+            parentesisE:n1 {: flagT = 1; flagN = temporalNum2;   :} ARITMETICOS:n2 parentesisC:n3{:
+
+
+
+            Nodo nd = new Nodo("VALORES_NUMERICOS");
+            nd.addHijo((Nodo)n2);
+            nd.setValor(((Nodo)n2).getValor());
+            
+             RESULT = nd;
+             :}  | Identificador:n1 Punto:n2 Identificador:n3 {:
+
+            conts++;
+            temp = new Tempnuevo(conts);
+
+            Nodo nd = new Nodo("VALORES_NUMERICOS");
+            nd.setNumNodo(parser.contador++);
+        
+
+             String revisar =  tabla.BuscarTipoN(n1.toString());
+                    
+                Record registro = tabla.esRecord(revisar);
+                       
+                int tipoReg = registro.buscarOffset(n3.toString());
+
+            nd.addHijo(new Nodo( n1.toString() + "[" + tipoReg  +  "]"  ));
+            nd.setValor( (generaracion.Igualdad("=", n1.toString() + "[" + tipoReg  +  "]" , temp)).getNombre()   );
+            
+                       
+            nd.addHijo(new Nodo(n1.toString()));
+             RESULT = nd;
+             :} 
+            ;
+
+
+OP_RECURSIVIDAD::= RECURSION:n1 {:
+            Nodo nd = new Nodo("OP_RECURSIVIDAD");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo((Nodo)n1);
+             RESULT = nd;
+             :}
+
+               | 
+                RECURSION:n1 OPRestSuma:n2 ARITMETICOS:n3{:
+            Nodo nd = new Nodo("OP_RECURSIVIDAD");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+            nd.addHijo(new Nodo(n2.toString()));
+             nd.addHijo((Nodo)n3);
+             RESULT = nd;
+             :}
+               | 
+                RECURSION:n1 OPMultDiv:n2 ARITMETICOS:n3 {:
+            Nodo nd = new Nodo("OP_RECURSIVIDAD");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+            nd.addHijo(new Nodo(n2.toString()));
+             nd.addHijo((Nodo)n3);
+             RESULT = nd;
+             :}
+               | 
+                ARITMETICOS:n1 OPRestSuma:n2 RECURSION:n3{:
+            Nodo nd = new Nodo("OP_RECURSIVIDAD");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+            nd.addHijo(new Nodo(n2.toString()));
+             nd.addHijo((Nodo)n3);
+             RESULT = nd;
+             :}
+               | 
+                ARITMETICOS:n1 OPMultDiv:n2 RECURSION:n3{:
+            Nodo nd = new Nodo("OP_RECURSIVIDAD");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+            nd.addHijo(new Nodo(n2.toString()));
+             nd.addHijo((Nodo)n3);
+             RESULT = nd;
+             :};
+
+ASIGNACION::=  Identificador:n1 Igual:n2 DATO:n3 {:
+           Nodo nd = new Nodo("ASIGNACION");
+           Nodo nodo1 = new Nodo(n1.toString());
+           //conts++;
+            //temp = new Tempnuevo(conts);
+             nodo1.setValor(((Nodo)n3).getValor());
+            nd.addHijo((Nodo)nodo1);
+
+
+             
+             nodo1.setNumNodo(parser.contador++);
+             nd.setValor( (generaracion.Igualdad(n2.toString(), (((Nodo)n3).getValor()) , n1.toString()))   );
+              
+             
+             nd.setNumNodo(parser.contador++);
+
+
+
+             Asignaciones.addHijo((Nodo)nodo1);
+             
+             RESULT = nd;
+             :}
+               | 
+                Identificador:n1 Punto:n2 Identificador:n3 Igual:n4 DATO:n5 {:
+            Nodo nd = new Nodo("ASIGNACION");
+            nd.setNumNodo(parser.contador++);
+           
+
+
+
+            
+            
+
+               String revisar =  tabla.BuscarTipoN(n1.toString());
+                    
+                Record registro = tabla.esRecord(revisar);
+                       
+                int tipoReg = registro.buscarOffset(n3.toString());
+
+
+
+                      nd.setValor( (generaracion.Igualdad(n4.toString(), (((Nodo)n5).getValor()) ,n1.toString() + "[" + tipoReg +"]"  )) );
+                    //generaracion.Operacion(n4.toString(), (((Nodo)n3).getValor())  , n1.toString() + "[" + tam +"]" );
+                                  
+
+                    
+            nd.addHijo(new Nodo(n1.toString() + n2.toString() + n3.toString() + n4.toString()));
+           
+             nd.addHijo((Nodo)n5);
+             RESULT = nd;
+             :}
+               | 
+                Identificador:n1 Igual:n2 RECURSION:n3{:
+            Nodo nd = new Nodo("ASIGNACION");
+            nd.setNumNodo(parser.contador++);
+            
+          
+              generaracion.Igualdad("=", "ret", n1.toString() );
+
+               
+
+            
+            
+            nd.addHijo(new Nodo(n1.toString() + n2.toString() ));
+            
+             nd.addHijo((Nodo)n3);
+             RESULT = nd;
+             :};
+
+IMPRIMIR::= Console:n1 Punto:n2 WriteLine:n3 parentesisE:n4 CONCATENACION:n5 parentesisC:n6 {:
+            Nodo nd = new Nodo(n1.toString() + n2.toString() + n3.toString() );
+            nd.setNumNodo(parser.contador++);
+
+
+            generaracion.Impres(((Nodo)n5).getValor());
+           
+             //nd.addHijo(new Nodo(n6.toString()));
+             RESULT = nd;
+             :};
+
+LEER::=  Console:n1 Punto:n2 ReadLine:n3 parentesisE:n4 parentesisC:n5{:
+             Nodo nd = new Nodo(n1.toString() + n2.toString() + n3.toString() + n4.toString()+" "+n5.toString());
+            //Nodo nd = new Nodo("LEER");
+            nd.setNumNodo(parser.contador++);
+            nd.setValor("Read()");
+            //nd.addHijo(new Nodo(n1.toString() + n2.toString() + n3.toString() + n4.toString()+" "+n5.toString()));
+            //nd.addHijo(new Nodo(n4.toString()+" "+n5.toString()));
+             RESULT = nd;
+             :}; 
+
+LLAMADA_FUNCION::= Identificador:n1 Punto:n2 Identificador:n3 parentesisE:n4  parentesisC:n5 {:
+            Nodo nd = new Nodo("LLAMADA_FUNCION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++; 
+          
+            nd.addHijo(new Nodo(n1.toString() + n2.toString() + n3.toString() + n4.toString()+" "+n5.toString() ));
+     
+             RESULT = nd;
+             :}
+                   | 
+                    Identificador:n1 Punto Identificador:n2 parentesisE:n3 PARAMETROS2:n4 parentesisC:n5{:
+            Nodo nd = new Nodo("LLAMADA_FUNCION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo(new Nodo(n1.toString()));
+            nd.addHijo(new Nodo(n2.toString()));
+            //nd.addHijo(new Nodo(n3.toString()));;
+             nd.addHijo((Nodo)n4);
+             //nd.addHijo(new Nodo(n5.toString()));
+             RESULT = nd;
+             :} ;
+
+CONCATENACION::=  Cadena:n1 CONCATENABLES:n2 CONCATENACION:n3 {:
+            Nodo nd = new Nodo("CONCATENACION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo(new Nodo(n1.toString()));
+            //nd.addHijo((Nodo)n2);
+             nd.addHijo((Nodo)n3);
+             RESULT = nd;
+             :}
+                  | ARITMETICOS:n1 CONCATENABLES:n2 CONCATENACION:n3 {:
+            Nodo nd = new Nodo("CONCATENACION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+            //nd.addHijo((Nodo)n2);
+             nd.addHijo((Nodo)n3);
+             RESULT = nd;
+             :}
+                  
+                  |Cadena:n1 {:
+            Nodo nd = new Nodo("CONCATENACION");
+            nd.setNumNodo(parser.contador++);
+            
+             nd.setValor(n1.toString());
+            nd.addHijo(new Nodo(n1.toString()));
+             RESULT = nd;
+             :}
+                  | ARITMETICOS:n1{:
+            Nodo nd = new Nodo("CONCATENACION");
+            nd.setNumNodo(parser.contador++);
+            nd.setValor(((Nodo)n1).getValor());
+
+            nd.addHijo((Nodo)n1);
+             RESULT = nd;
+             :}| RECURSION:n1 CONCATENABLES:n2 CONCATENACION:n3 {:
+                
+                   Nodo nd = new Nodo("CONCATENACION");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo((Nodo)n1);
+            //nd.addHijo((Nodo)n2);
+             nd.addHijo((Nodo)n3);
+             RESULT = nd;
+                :}
+                | RECURSION:n1{: 
+
+                Nodo nd = new Nodo("CONCATENACION");
+            nd.setNumNodo(parser.contador++);
+           
+             nd.addHijo((Nodo)n1);
+             RESULT = nd;
+                :}
+       
+                  ;
+
+CONCATENABLES::= concatenacion:n1 {:
+            Nodo nd = new Nodo("CONCATENABLES");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo(new Nodo(n1.toString()));
+             RESULT = nd;
+             :}
+            | coma:n1{:
+            Nodo nd = new Nodo("CONCATENABLES");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+            nd.addHijo(new Nodo(n1.toString()));
+             RESULT = nd;
+             :};
+
+
+CUERPO::=  DECLARACION:n1 Enter  CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+           
+             nd.addHijo((Nodo)n1);
+          
+             if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+
+             RESULT = nd;
+             :}
+           | IMPRIMIR:n1 Enter CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+            
+             nd.addHijo((Nodo)n1);
+
+             if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+
+             RESULT = nd;
+             :}
+           | ASIGNACION:n1 Enter CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+            
+             nd.addHijo((Nodo)n1);
+
+               if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+             RESULT = nd;
+             :}
+           | SENTENCIA_IF:n1 Enter  CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+           
+             nd.addHijo((Nodo)n1);
+                 
+
+            nd.setHijos2(((Nodo)n1).getHijos2());
+
+              //if (n2 != null)
+             //nd.addHijo((Nodo)n2);
+
+             RESULT = nd;
+             :}
+           | ELSE_IF:n1 Enter CUERPO:n2{:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+             nd.addHijo((Nodo)n1);
+             nd.setHijos2(((Nodo)n1).getHijos2());
+
+              //if (n2 != null)
+             //nd.addHijo((Nodo)n2);
+
+             RESULT = nd;
+             :} 
+           | DECLARACION_FOR:n1 Enter  CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+          
+             nd.addHijo((Nodo)n1);
+
+               if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+
+             RESULT = nd;
+             :}
+           | WHILE:n1 Enter  CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+             nd.addHijo((Nodo)n1);
+
+               if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+
+             RESULT = nd;
+             :}
+           | DO_WHILE:n1 Enter CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+           
+             nd.addHijo((Nodo)n1);
+
+
+              if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+             RESULT = nd;
+             :}
+          
+           | LEER:n1 Enter CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+           
+             nd.addHijo((Nodo)n1);
+
+               if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+             RESULT = nd;
+             :}
+           | LLAMADA_FUNCION:n1 Enter CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+            
+             nd.addHijo((Nodo)n1);
+
+               if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+             RESULT = nd;
+             :}
+           | Comentario:n1 Enter CUERPO:n2 {:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+              nd.addHijo(new Nodo(n1.toString()));
+
+                if (n2 != null){
+             nd.addHijo((Nodo)n2);
+             nd.setHijos2(((Nodo)n2).getHijos2());
+             }
+             RESULT = nd;
+             :}
+           | RECURSION:n1 Enter CUERPO:n2{:
+            Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+          
+             nd.addHijo((Nodo)n1);
+             if (n2 != null)
+             nd.addHijo((Nodo)n2);
+             //nd.setHijos2(((Nodo)n2).getHijos2());
+             RESULT = nd;
+             :}
+           | Enter:x CUERPO:n2{:
+            
+           Nodo nd = new Nodo("CUERPO");
+            nd.setNumNodo(parser.contador++);
+
+             if (n2 != null){
+           
+             nd.setHijos2(((Nodo)n2).getHijos2());
+                RESULT = nd;
+             }
+
+          
+         
+
+           :}
+           |
+;
+
+
+RECURSION::= Identificador:n1 parentesisE:n2 PARAMETROS2:n3 parentesisC:n4 {:
+            Nodo nd = new Nodo("RECURSION");
+            nd.setNumNodo(parser.contador++);
+
+               for(int i = 0; i < temporalLis3.getLista2().size(); i++){
+               
+                generaracion.OtraCosa("Param",  temporalLis3.getLista2().get(i) );
+            }
+
+                generaracion.OtraCosa("Call", n1.toString() +  "," + temporalLis3.getLista2().size() );
+                 temporalLis3 = new Listas();
+
+
+                  nd.setValor(n1.toString());
+
+
+              nd.addHijo(new Nodo(n1.toString()));
+              //nd.addHijo(new Nodo(n2.toString()));
+             nd.addHijo((Nodo)n3);
+             //nd.addHijo(new Nodo(n4.toString()));
+             RESULT = nd;
+             
+             :}
+            | Identificador:n1 parentesisE:n2 parentesisC:n3{:
+            Nodo nd = new Nodo("RECURSION");
+            nd.setNumNodo(parser.contador++);
+
+             generaracion.OtraCosa("Call", n1.toString() +  ",0" );
+                 temporalLis3 = new Listas();
+
+             nd.setValor(n1.toString());
+            
+              nd.addHijo(new Nodo(n1.toString()));
+             // nd.addHijo(new Nodo(n2.toString()+" "+n3.toString()));
+             RESULT = nd;
+             :};
+
+DECLARACION_FOR::=  For:n1 M:m1  ASIGNACION:n2 TO:n3 Numero:n4 M:m2 {:  tempoVar = ((Nodo)n2).getHijos().get(0).getNombre();
+                generaracion.Booleanos("<",tempoVar,n4.toString() ,""); :}  CUERPO:n5  Next:n6  M:m3 {:
+            
+            String variable = "";
+            Nodo nd = new Nodo("FOR");
+            nd.setNumNodo(parser.contador++);
+              nd.addHijo(new Nodo(n1.toString()));
+              nd.addHijo((Nodo)n2);
+              nd.addHijo(new Nodo(n3.toString() + " " + n4.toString() ));
+
+               
+
+              Listas booli = new Listas();
+              booli.getVerdadero().add(Integer.parseInt(m2.toString()));
+
+             
+             conts++;
+             temp = new Tempnuevo(conts); 
+             generaracion.Operacion("+",tempoVar,"1",temp); 
+             generaracion.Igualdad("=", temp.getNombre(), tempoVar);
+                  
+                
+            generaracion.Completo(booli.getVerdadero(),Integer.toString(generaracion.getIntermedio().size() + 1) );
+            generaracion.Saltos("GOTO", m2.toString() );
+               
+                 
+              
+
+             if (n5 != null)
+             nd.addHijo((Nodo)n5);
+             nd.addHijo(new Nodo(n6.toString()));
+             RESULT = nd;
+             :}|   For:n1 M:m1 ASIGNACION:n2 TO:n3  Identificador:n4   M:m2 CUERPO:n5 Next:n6 {:
+                        Nodo nd = new Nodo("FOR");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+              nd.addHijo(new Nodo(n1.toString()));
+              nd.addHijo((Nodo)n2);
+              nd.addHijo(new Nodo(n3.toString() + " " + n4.toString() ));
+              
+
+             if (n5 != null)
+             nd.addHijo((Nodo)n5);
+             nd.addHijo(new Nodo(n6.toString()));
+             RESULT = nd;
+             :} ;
+
+WHILE::= While:n1 M:m1 DECLARACION_IF:n2 M:m2 CUERPO:n3 End:n4 While:n5 M:m4 {:
+            Nodo nd = new Nodo("WHILE");
+            nd.setNumNodo(parser.contador++);
+            parser.contador++;
+              nd.addHijo(new Nodo(n1.toString()));
+              nd.addHijo((Nodo)n2);
+
+              Listas booli = new Listas();
+              generaracion.Completo(((Nodo)n2).getHijos2().getVerdadero(),m2.toString());
+              booli.setSiguiente(((Nodo)n2).getHijos2().getFalso());
+
+              
+
+
+              if (n3 != null){
+
+              nd.addHijo((Nodo)n3);
+              //generaracion.Completo(((Nodo)n3).getHijos2().getSiguiente() ,m1.toString());
+              generaracion.Completo(((Nodo)n2).getHijos2().getFalso(),Integer.toString( generaracion.getIntermedio().size() + 1));
+              generaracion.Saltos("GOTO",m1.toString());
+              
+              }
+              nd.addHijo(new Nodo(n4.toString()+" "+n5.toString()));
+              nd.setHijos2(booli);
+             RESULT = nd;
+             :}  ;
+
+DO_WHILE::= Do:n1 While:n2 M:m1 DECLARACION_IF:n3 M:m2 CUERPO:n4 Loop:n5 M:m4 {:
+            Nodo nd = new Nodo("DO_WHILE");
+            nd.setNumNodo(parser.contador++);
+          
+              nd.addHijo(new Nodo(n1.toString() + " " + n2.toString()));
+
+              Listas booli = new Listas();
+              generaracion.Completo(((Nodo)n3).getHijos2().getVerdadero(),m2.toString());
+              booli.setSiguiente(((Nodo)n3).getHijos2().getFalso());
+
+              
+              nd.addHijo((Nodo)n3);
+
+              if (n4 != null){
+              nd.addHijo((Nodo)n4);
+                
+                 generaracion.Completo(((Nodo)n3).getHijos2().getFalso(),Integer.toString( generaracion.getIntermedio().size() + 1));
+              generaracion.Saltos("GOTO",m1.toString());
+
+}                
+              nd.addHijo(new Nodo(n5.toString()));
+              nd.setHijos2(booli);
+
+             RESULT = nd;
+             :} ;
+
+    FINAL::= End:n1 SentenciaModulo:n2{:
+
+        Nodo nd = new Nodo("FINAL");
+        nd.setNumNodo(parser.contador++);
+        parser.contador++;
+
+        nd.addHijo(new Nodo(n1.toString() + " " + n2.toString()));
+       
+         
+        RESULT = nd;
+
+
+:};
+
+
+DESPUES::= Enter DESPUES | Enter;
+
+PROGRAMA::= Enter PROGRAMA | INICIO | INICIO DESPUES ;

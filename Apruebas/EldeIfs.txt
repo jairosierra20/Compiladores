@@ -1,0 +1,21 @@
+Module Module1 
+
+	
+
+     Sub Main() 
+	
+	Dim num1 as Integer
+	Dim num2 as Integer
+       	
+	num1 = 1
+	num2 = 0
+	
+	 if  num1 > num2 then
+		num1 = num1 + 1
+	end if
+
+
+      
+    End Sub
+
+End Module
